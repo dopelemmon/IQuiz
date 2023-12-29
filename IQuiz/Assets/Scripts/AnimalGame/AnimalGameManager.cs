@@ -9,24 +9,50 @@ namespace IQuiz
     public class AnimalGameManager : MonoBehaviour
     {
         //DECLARING VARIABLES 
+        [Header("Component reference")]
+        public AudioSource timerSounds;
+        [Space]
 
         //NOTE: THE PREFABS ARE THE BUTTONS AND THE SOUNDS 
         //NOTE: INSTANTIATE MEANS SPAWNING GAME OBJECTS INTO GAME AREA
-        public GameObject[] prefabChoices; //ARRAY OF PREFABS TO INSTANTIATE
-        public Transform choicesParent; // THE PARENT OF INSTANTIATIGN PREFAB 
-
-        private List<GameObject> instantiatedChoices = new List<GameObject>(); // LIST OF INSTANTIATED PREFAB 
-
+        //NOTE: THE HEADER AND SPACE ATTRIBUTES INSIDE BRACKETS ARE JUST TO ORGANIZE THE VARIABLE IN THE INSPECTOR PANEL
+        [Header("Reference to other scripts")]
+        public SandClock sandClock;
         [Space]
+
+        [Header("Arrays")]
+        public GameObject[] prefabChoices; //ARRAY OF PREFABS TO INSTANTIATE
+        private List<GameObject> instantiatedChoices = new List<GameObject>(); // LIST OF INSTANTIATED PREFAB 
+        [Space]
+
+        [Header("Parent Transform")]
+
+        public Transform choicesParent; // THE PARENT OF INSTANTIATIGN PREFAB 
+        [Space]
+
+        [Header("Question Variables")]
         public AudioSource animalSoundQuestion; //THE SOUND TO BE PLAYED 
         int randomIndexSoundQuestion; //RANDOM SOUNDS IN INSTANTIATED BUTTONS
+        [Space]
 
         [Header("Player Stats")]
         public int playerScore; // SCORE OF THE PLAYER
+        [Space]
+
+        [Header("Timer")]
+        public float gameTimer = 5f;
+        public float timer = 10f;
+
+        void Awake()
+        {
+
+        }
 
         // Start is called before the first frame update
         void Start()
         {
+            sandClock.onRoundEnd += OnRoundEnd;
+
             //CALLING THESE 2 FUNCTIONS WHEN THE GAME STARTS
             InstantiateNewPrefabs();
             PlaySound(); // Play sound when the game starts
@@ -35,6 +61,42 @@ namespace IQuiz
         // Update is called once per frame
         void Update()
         {
+            timer -= Time.deltaTime;
+            if (timer <= 5.0f)
+            {
+                if (!timerSounds.isPlaying)
+                {
+                    Debug.Log("Playing sound");
+                    timerSounds.Play();
+                }
+            }
+
+            if (timer < 0.2f)
+            {
+                if (timerSounds.isPlaying)
+                {
+                    timerSounds.Stop();
+                }
+            }
+        }
+        void OnRoundEnd(int round)
+        {
+            DestroyInstantiatedPrefabs();
+            InstantiateNewPrefabs();
+            timer = sandClock.durationTime;
+            Debug.Log("EndRound");
+        }
+
+        public void GameTimer()
+        {
+            if (gameTimer > 0)
+            {
+                gameTimer -= 1f * Time.deltaTime;
+            }
+            else
+            {
+                Debug.Log("GAME OVER");
+            }
 
         }
 
@@ -48,21 +110,47 @@ namespace IQuiz
         //CHECKER IF THE CLICKED BUTTON IS THE RIGHT ANSWER
         public void Checker(int index)
         {
+            //****** DISABLES THE BUTTON ONCE THE BUTTON IS PRESSED ******
+            foreach (var item in instantiatedChoices)
+            {
+                Button buttonComponent = item.GetComponent<Button>();
+                if (buttonComponent != null)
+                {
+                    Destroy(buttonComponent);
+                }
+
+
+                Image imageComponent = item.GetComponent<Image>();
+                if (imageComponent != null)
+                {
+                    Color currentColor = imageComponent.color;
+                    currentColor.a = 0.588f; // Set alpha value (approximately 0.588)
+                    imageComponent.color = currentColor;
+                }
+
+            }
+            //******************************************************
+
+            //CHECKS IF THE BUTTON IS THE RIGHT ANSWER
             if (index == randomIndexSoundQuestion)
             {
-                playerScore++; // IF ANSWER IS CORRECT THEN INCREASE SCORE
-
+                playerScore++;
+                gameTimer = 10f;
             }
             else
             {
-                Debug.Log("Wrong button pressed."); // IF NOT THEN DO NOTHING
+                Debug.Log("Wrong button pressed.");
+                gameTimer = 10f;
             }
         }
+
+
         //PLAYS THE SOUND. THIS FUNCTION IS CALLED WHEN YOU PRESS THE MUSIC BUTTON OR YOU ANSWERED PREVIOUS QUESTION
         public void PlaySound()
         {
             animalSoundQuestion.Play();
         }
+
         //DESTROYS THE SPAWNED ANIMALS
         //THIS FUNCITON IS TO REPLACE THE QUESTIONS WITH THE NEW SET OF ANIMALS
         void DestroyInstantiatedPrefabs()
@@ -73,6 +161,7 @@ namespace IQuiz
             }
             instantiatedChoices.Clear();
         }
+
         //THIS IS THE FUNCTION TO SPAWN ANIMAL BUTTON
         void InstantiateNewPrefabs()
         {
@@ -103,15 +192,11 @@ namespace IQuiz
 
                 // Adding function to onclick event with captured buttonIndex
                 buttonChoices.onClick.AddListener(() => Checker(buttonIndex));
-                buttonChoices.onClick.AddListener(() => DestroyInstantiatedPrefabs());
-                buttonChoices.onClick.AddListener(() => InstantiateNewPrefabs());
-                buttonChoices.onClick.AddListener(() => PlaySound());
 
                 availableIndexes.RemoveAt(randomIndex);
             }
             GetAnimalSounds();
+            PlaySound();
         }
-
-
     }
 }

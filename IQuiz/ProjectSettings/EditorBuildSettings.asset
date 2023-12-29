@@ -4,7 +4,16 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/Animals.unity
+    guid: 26d1765823bc3e04abfcbeebb265a97f
   m_configObjects:
+    com.unity.adaptiveperformance.google.android.provider_settings: {fileID: 11400000,
+      guid: 1765be855d4de6643a7204e6763fe662, type: 2}
+    com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: 783befd153781da46bbcd6592cea60f1,
+      type: 2}
+    com.unity.adaptiveperformance.samsung.android.provider_settings: {fileID: 11400000,
+      guid: 8d78ccb58a56c6a499bf127e50d6a306, type: 2}
     com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000,
       guid: 614dd59e887d8f74ab906cb02c774f9e, type: 2}
