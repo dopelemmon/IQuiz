@@ -11,6 +11,7 @@ namespace IQuiz
         //DECLARING VARIABLES 
         [Header("Component reference")]
         public AudioSource timerSounds;
+        public AudioSource[] answerSounds; // the audiosource sounds variable 
         [Space]
 
         //NOTE: THE PREFABS ARE THE BUTTONS AND THE SOUNDS 
@@ -22,12 +23,15 @@ namespace IQuiz
 
         [Header("Arrays")]
         public GameObject[] prefabChoices; //ARRAY OF PREFABS TO INSTANTIATE
+        public GameObject[] answerIndicatorPrefab;
         private List<GameObject> instantiatedChoices = new List<GameObject>(); // LIST OF INSTANTIATED PREFAB 
+        private List<GameObject> instantiatedIndicators = new List<GameObject>();
         [Space]
 
         [Header("Parent Transform")]
 
         public Transform choicesParent; // THE PARENT OF INSTANTIATIGN PREFAB 
+        public Transform canvasTransform;
         [Space]
 
         [Header("Question Variables")]
@@ -37,6 +41,8 @@ namespace IQuiz
 
         [Header("Player Stats")]
         public int playerScore; // SCORE OF THE PLAYER
+        public int answerInt;
+        bool isCorrect;
         [Space]
 
         [Header("Timer")]
@@ -81,10 +87,8 @@ namespace IQuiz
         }
         void OnRoundEnd(int round)
         {
-            DestroyInstantiatedPrefabs();
-            InstantiateNewPrefabs();
-            timer = sandClock.durationTime;
-            Debug.Log("EndRound");
+            StartCoroutine(AnswerIndcatorAnimation());
+
         }
 
         public void GameTimer()
@@ -134,15 +138,49 @@ namespace IQuiz
             //CHECKS IF THE BUTTON IS THE RIGHT ANSWER
             if (index == randomIndexSoundQuestion)
             {
-                playerScore++;
+                answerInt = 0;
                 gameTimer = 10f;
+                isCorrect = true;
             }
             else
             {
                 Debug.Log("Wrong button pressed.");
+                answerInt = 1;
                 gameTimer = 10f;
             }
         }
+
+        IEnumerator AnswerIndcatorAnimation()
+        {
+            answerSounds[answerInt].Play();
+            yield return new WaitForSeconds(0.5f);
+
+            GameObject instantiatedAnswerIndicator = Instantiate(answerIndicatorPrefab[answerInt], canvasTransform);
+            instantiatedIndicators.Add(instantiatedAnswerIndicator);
+            DestroyInstantiatedPrefabs();
+            Time.timeScale = 0f;
+
+            yield return new WaitForSecondsRealtime(2f); // Use WaitForSecondsRealtime for accurate time measurement
+
+            // Clear indicators and perform necessary cleanup
+            instantiatedIndicators.Remove(instantiatedAnswerIndicator); // Remove from list before destroying
+            Destroy(instantiatedAnswerIndicator);
+            InstantiateNewPrefabs();
+            timer = sandClock.durationTime;
+            if(isCorrect)
+            {
+                playerScore++;
+                isCorrect = false;
+            }
+            answerInt = 1;
+
+            // Set the timescale back to 1 after all the operations
+            Time.timeScale = 1f;
+            Debug.Log("EndRound");
+
+            
+        }
+
 
 
         //PLAYS THE SOUND. THIS FUNCTION IS CALLED WHEN YOU PRESS THE MUSIC BUTTON OR YOU ANSWERED PREVIOUS QUESTION
