@@ -88,20 +88,6 @@ namespace IQuiz
         void OnRoundEnd(int round)
         {
             StartCoroutine(AnswerIndcatorAnimation());
-
-        }
-
-        public void GameTimer()
-        {
-            if (gameTimer > 0)
-            {
-                gameTimer -= 1f * Time.deltaTime;
-            }
-            else
-            {
-                Debug.Log("GAME OVER");
-            }
-
         }
 
         //THIS FUNCTION GETS THE ANIMAL SOUNDS OF THE INSTANTIATED BUTTON
