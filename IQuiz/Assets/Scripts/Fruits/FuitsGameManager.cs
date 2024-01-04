@@ -41,10 +41,7 @@ namespace IQuiz
             // Check for user input to spawn fruits and create buttons
             if (Input.GetKeyDown(KeyCode.Space))
             {
-
                 SpawnQuestion();
-
-
             }
         }
 
