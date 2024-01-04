@@ -11,11 +11,11 @@ namespace IQuiz
         public int minButtonNum;
         public int maxButtonNum;
 
-        public bool hasAnswered;
+        //public bool hasAnswered;
         // Start is called before the first frame update
         void Start()
         {
-            
+
             minButtonNum = 0;
             maxButtonNum = 20;
         }
@@ -23,19 +23,32 @@ namespace IQuiz
         // Update is called once per frame
         void Update()
         {
-        
+
+        }
+
+        public void ButtonIsPressed()
+        {
+            Debug.Log("this button is pressed");
         }
 
         public void CheckAnswer()
         {
-            if(this.buttonNumber == mathGameManager.answer && !hasAnswered)
+            if (this.buttonNumber == mathGameManager.answer)
             {
                 mathGameManager.instantiatedAnswerIndicator = 0;
+                foreach (var button in mathGameManager.answerButton)
+                {
+                    button.interactable = false;
+                }
 
             }
-            if(this.buttonNumber != mathGameManager.answer && !hasAnswered)
+            if (this.buttonNumber != mathGameManager.answer)
             {
                 mathGameManager.instantiatedAnswerIndicator = 1;
+                foreach (var button in mathGameManager.answerButton)
+                {
+                    button.interactable = false;
+                }
 
             }
         }

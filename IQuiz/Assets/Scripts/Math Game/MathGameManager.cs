@@ -9,6 +9,7 @@ namespace IQuiz
 {
     public class MathGameManager : MonoBehaviour
     {
+        // This region includes declarations of variables and fields used in the class.
         #region variables
         [Header("UI Elements")]
         // These public variables hold references to the UI elements in the Unity Inspector.
@@ -21,6 +22,8 @@ namespace IQuiz
         public Transform canvasTransform;
         public TMP_Text levelText;
         public TMP_Text questionText;
+        public TMP_Text playerScoreText;
+        public Sprite buttonSelectedSprite;
         [Space]
 
         [Header("Sound")]
@@ -30,6 +33,7 @@ namespace IQuiz
         [Header("Script Reference")]
         public PlayerAnswer[] playerAnswer; // An array of PlayerAnswer script references
         public SandClock sandClock;
+        public Player playerStats;
         [Space]
 
         [Header("Time")]
@@ -52,11 +56,11 @@ namespace IQuiz
 
         #endregion
 
+        // This region contains Unity's lifecycle methods (Start, Update, etc.).
         #region Unity Methods
-        // Start is called before the first frame update
         void Start()
         {
-            // When the game starts, generate the first question and answer choices.
+            // Initialization when the game starts.
             Addition(); // Generate numbers for the question
             InitializeAnswer(); // Set up the answer choices
             sandClock.onRoundEnd += OnRoundEnd;
@@ -65,33 +69,47 @@ namespace IQuiz
 
             levelText.text = $"LEVEL {currentLevel.ToString()}";
             questionText.text = $"QUESTION {currentQuestion.ToString()}";
-
+            playerScoreText.text = $"SCORE: {playerStats.playerScore.ToString()}";
         }
 
-        // Update is called once per frame
         void Update()
         {
-            UpdateTime();
-
-
+            UpdateTime(); // Update timer display and functionality
         }
 
+        // Coroutine for handling next question logic.
         IEnumerator NextQuestion()
         {
+            // Pauses the time for 3 seconds when the round ends.
             Time.timeScale = 0f;
             GameObject instantiatedPrefab = Instantiate(answerIndicatorPrefab[instantiatedAnswerIndicator], canvasTransform);
             yield return new WaitForSecondsRealtime(3f);
             Destroy(instantiatedPrefab);
-            timer = 10f;
-            foreach (var item in playerAnswer)
+
+            // Check for the correct answer and update player score and timer.
+            if (instantiatedAnswerIndicator == 0)
             {
-                item.hasAnswered = false;
+                playerStats.UpdatePlayerScore();
+                playerScoreText.text = $"SCORE: {playerStats.playerScore.ToString()}";
+            }
+            timer = 10f;
+
+            // Reset 'hasAnswered' status for all players and update question and level counters.
+            // foreach (var item in playerAnswer)
+            // {
+            //     item.hasAnswered = false;
+                
+            // }
+
+            foreach (var button in answerButton)
+            {
+                button.image.sprite = buttonSelectedSprite;
+                button.interactable = true;
             }
             instantiatedAnswerIndicator = 1;
             if (currentQuestion < questionEachLevel)
             {
                 currentQuestion++;
-                Debug.Log("added currentquestion");
             }
             else
             {
@@ -101,81 +119,87 @@ namespace IQuiz
             levelText.text = $"LEVEL {currentLevel.ToString()}";
             questionText.text = $"QUESTION {currentQuestion.ToString()}";
             LevelManager();
-            Debug.Log($"Question {currentQuestion} at Level {currentLevel}");
             Time.timeScale = 1f;
         }
 
         #endregion
 
+        // This region contains custom methods used in the game logic.
         #region Custom Methods
 
+        // Method to manage game levels based on the current level.
         public void LevelManager()
         {
             switch (currentLevel)
             {
+                // Different cases represent different levels and their corresponding operations.
                 case 1:
-                    StartAddition();
+                    StartAddition(); // Start addition-based questions
                     break;
                 case 2:
-                    StartSubtraction();
+                    StartSubtraction(); // Start subtraction-based questions
                     break;
                 case 3:
-                    StartMixed();
+                    StartMixed(); // Start mixed addition and subtraction questions
                     break;
                 case 4:
-                    StartMixed();
+                    StartMixed(); // Mixed questions with adjusted timer and level settings
                     timerLimit = 8f;
                     timer = timerLimit;
                     sandClock.durationTime = timerLimit;
                     break;
                 case 5:
-                    StartMixed();
+                    StartMixed(); // More challenging mixed questions with further adjusted settings
                     timerLimit = 6f;
                     timer = timerLimit;
                     sandClock.durationTime = timerLimit;
                     break;
                 default:
-                    Debug.Log("YOU HAVE REACHED THE MAXIMUM LEVEL ");
+                    Debug.Log("YOU HAVE REACHED THE MAXIMUM LEVEL "); // Alert when the max level is reached
                     break;
             }
         }
+
+        // Method to update timer functionality.
         public void UpdateTime()
         {
             timer -= Time.deltaTime;
 
+            // Play timer sound when the timer reaches a certain point.
             if (timer <= 5f && !timerSound.isPlaying)
             {
                 timerSound.Play();
-                //Debug.Log("Playing timer sound");
             }
 
+            // Stop timer sound when the timer is almost finished.
             if (timer <= 2f && timerSound.isPlaying)
             {
                 timerSound.Stop();
-                //Debug.Log("Stopping timer sound");
             }
         }
 
+        // Handler for the round end event.
         void OnRoundEnd(int round)
         {
-            StartCoroutine(NextQuestion());
+            StartCoroutine(NextQuestion()); // Proceed to the next question after the round ends
         }
 
+        // Set 'hasAnswered' status for all players to true.
+        // public void SetHasAnswered()
+        // {
+        //     foreach (var item in playerAnswer)
+        //     {
+        //         item.hasAnswered = true;
+        //     }
+        // }
 
-
-        public void SetHasAnswered()
-        {
-            foreach (var item in playerAnswer)
-            {
-                item.hasAnswered = true;
-            }
-        }
-
+        // Method to initialize answer choices for questions.
         public void InitializeAnswer()
         {
-            int correctAnswerIndex = Random.Range(0, answerChoices.Length); // Randomly select the index for the correct answer
+            // Randomly select the index for the correct answer.
+            int correctAnswerIndex = Random.Range(0, answerChoices.Length);
 
-            List<int> numbersAvailable = new List<int>(); // Create a list to store available numbers
+            List<int> numbersAvailable = new List<int>(); // List to store available numbers
 
             // Fill the list with numbers from 1 to 19 (as buttons should have unique numbers from 1 to 19)
             for (int i = 1; i <= 19; i++)
@@ -183,111 +207,105 @@ namespace IQuiz
                 numbersAvailable.Add(i);
             }
 
-            // Remove the correct answer from the available numbers
+            // Remove the correct answer from the available numbers.
             numbersAvailable.Remove(answer);
 
-            // Loop through each button to assign values
+            // Assign values to the answer buttons.
             for (int i = 0; i < answerChoices.Length; i++)
             {
-                if (i == correctAnswerIndex) // If this is the button for the correct answer:
+                if (i == correctAnswerIndex)
                 {
-                    answerChoices[i].text = answer.ToString(); // Assign the correct answer to this button
-                    playerAnswer[i].buttonNumber = answer; // Update the button's number with the correct answer
+                    // Assign the correct answer to a randomly chosen button.
+                    answerChoices[i].text = answer.ToString();
+                    playerAnswer[i].buttonNumber = answer;
                 }
-                else // For other buttons (not the one with the correct answer):
+                else
                 {
-                    // Select a random number from the available numbers and assign it to the button
+                    // Assign random numbers to other buttons.
                     int randomIndex = Random.Range(0, numbersAvailable.Count);
                     int randomValue = numbersAvailable[randomIndex];
-                    answerChoices[i].text = randomValue.ToString(); // Assign a random number to this button
-                    playerAnswer[i].buttonNumber = randomValue; // Update the button's number
-                    numbersAvailable.RemoveAt(randomIndex); // Remove the used number from available numbers
-
-
+                    answerChoices[i].text = randomValue.ToString();
+                    playerAnswer[i].buttonNumber = randomValue;
+                    numbersAvailable.RemoveAt(randomIndex);
                 }
-
             }
         }
 
+        // Method to generate an addition question.
         public int Addition()
         {
             operatorText.text = "+";
-            // Generate two random numbers for addition.
             num1 = Random.Range(1, 10);
             num2 = Random.Range(1, 10);
 
-            // Update the UI text elements to display the generated numbers.
             num1Text.text = num1.ToString();
             num2Text.text = num2.ToString();
 
-            // Calculate the correct answer for the addition.
             answer = num1 + num2;
-            return answer; // Return the calculated answer
+            return answer;
         }
 
+        // Method to generate a subtraction question.
         public int Subtraction()
         {
             operatorText.text = "-";
-            // Generate two random numbers for subtraction.
-            num1 = Random.Range(1, 10);
-            num2 = Random.Range(1, 10);
+            num1 = Random.Range(1, 20);
+            num2 = Random.Range(1, 20);
 
             // Ensure the first number is greater than the second for subtraction.
             while (num1 <= num2)
             {
-                num1 = Random.Range(1, 10);
-                num2 = Random.Range(1, 10);
+                num1 = Random.Range(1, 20);
+                num2 = Random.Range(1, 20);
             }
 
             num1Text.text = num1.ToString();
             num2Text.text = num2.ToString();
-            // Calculate the correct answer for the subtraction.
-            answer = num1 - num2;
-            Debug.Log("subtraction");
-            return answer; // Return the calculated answer
 
+            answer = num1 - num2;
+            return answer;
         }
 
+        // Method to start addition-based questions.
         public void StartAddition()
         {
-
-
-            for (int i = 1; i < questionEachLevel; i++)
+            // Generate addition questions for the current level.
+            for (int i = 1; i <= questionEachLevel; i++)
             {
                 Addition();
                 InitializeAnswer();
             }
-
         }
 
+        // Method to start subtraction-based questions.
         public void StartSubtraction()
         {
-
-            for (int i = 1; i < questionEachLevel; i++)
+            // Generate subtraction questions for the current level.
+            for (int i = 1; i <= questionEachLevel; i++)
             {
                 Subtraction();
                 InitializeAnswer();
             }
         }
 
+        // Method to start mixed addition and subtraction questions.
         public void StartMixed()
         {
-
-            for (int i = 1; i < questionEachLevel; i++)
+            // Generate mixed questions (addition or subtraction) for the current level.
+            for (int i = 1; i <= questionEachLevel; i++)
             {
                 if (Random.value < 0.5f)
                 {
                     Addition();
                 }
-
                 else
                 {
                     Subtraction();
                 }
-
                 InitializeAnswer();
             }
         }
         #endregion
     }
 }
+
