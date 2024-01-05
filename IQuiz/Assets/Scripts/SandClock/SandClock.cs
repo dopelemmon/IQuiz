@@ -23,6 +23,7 @@ namespace IQuiz
         private float timer;
 
         //EVENTS
+        public UnityAction<int> onRoundStart;
         public UnityAction<int> onRoundEnd;
         //ROUND VARIABLE
         [SerializeField] int currentRound = 0;
@@ -42,6 +43,8 @@ namespace IQuiz
         public void Begin()
         {
             currentRound++;
+            onRoundStart?.Invoke(currentRound);
+
 
             //SCALING SANDPYRAMID
             sandPyramidRect.DOScaleY(1f, durationTime / 3f).From(0f);
@@ -54,11 +57,13 @@ namespace IQuiz
 
 
             //TOP SAND PART FALLING OR DECREASING ANIMATION CALCULATION WITH THE DURATION TIME VARIABLE
+
             topFillImage
                 .DOFillAmount(0, durationTime)
                 .SetEase(Ease.Linear)
                 .OnUpdate(OnTimeUpdate)
                 .OnComplete(OnRoundTimeComplete);
+
         }
 
 

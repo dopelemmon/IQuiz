@@ -1482,6 +1482,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 343243184204689372, guid: 77ad12a4b0189c04f84ed6cef8ae846d,
         type: 3}
+      propertyPath: totalRounds
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 343243184204689372, guid: 77ad12a4b0189c04f84ed6cef8ae846d,
+        type: 3}
       propertyPath: durationTime
       value: 15
       objectReference: {fileID: 0}

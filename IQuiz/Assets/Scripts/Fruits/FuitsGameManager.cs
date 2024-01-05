@@ -52,6 +52,7 @@ namespace IQuiz
         void Start()
         {
             sandClock.onRoundEnd += OnRoundEnd;
+            //sandClock.onRoundStart += OnRoundStart;
             // For example purposes, assume fruitName is obtained from the instantiated fruit object
             fruitName = "Apple"; // Replace this with the actual fruit name from your game
 
@@ -60,6 +61,7 @@ namespace IQuiz
 
             SpawnQuestion();
             playerScore = 0;
+            playerScoreText.text = $"Score: {playerScore}";
         }
 
         // Update is called once per frame
@@ -67,7 +69,7 @@ namespace IQuiz
         {
             UpdateTime();
 
-            playerScoreText.text = $"Score: {playerScore}";
+            
         }
 
         #endregion
@@ -101,8 +103,6 @@ namespace IQuiz
             {
                 Debug.Log("Congratulations! You've spelled the fruit name.");
                 // Perform actions for correct spelling
-                SpawnQuestion();
-                nameText.text = "";
                 playerScore++;
             }
 
@@ -167,7 +167,22 @@ namespace IQuiz
             CreateButtons(shuffledName);
         }
         #endregion
+        
+        #region IENUMERATOR
 
+        IEnumerator EndQuestion()
+        {
+            Debug.Log("Round End");
+            yield return new WaitForSeconds(.1f);
+            playerScoreText.text = $"Score: {playerScore}";
+            SpawnQuestion();
+            userInput = "";
+            nameText.text = "";
+            gameTimer = 15f;
+            
+
+        }
+        #endregion
         #region Timer Method
         public void UpdateTime()
         {
@@ -188,6 +203,11 @@ namespace IQuiz
         }
 
         void OnRoundEnd(int round)
+        {
+            StartCoroutine(EndQuestion());
+        }
+
+        void OnRoundStart(int round)
         {
             SpawnQuestion();
             gameTimer = 15f;
