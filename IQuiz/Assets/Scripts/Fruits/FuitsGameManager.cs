@@ -21,7 +21,7 @@ namespace IQuiz
         [Space]
 
         [Header("Other Script Reference")]
-        public SandClock sandClock;
+        public TimerSand sandClock;
         [Space]
 
         [Header("Audio")]
@@ -44,6 +44,8 @@ namespace IQuiz
 
         char clickedLetter;
 
+        bool isRoundEnd;
+
         string userInput = ""; // User's input for spelling the fruit name
 
         #region MonoBehaviour Callbacks
@@ -51,8 +53,7 @@ namespace IQuiz
         // Start is called before the first frame update
         void Start()
         {
-            sandClock.onRoundEnd += OnRoundEnd;
-            //sandClock.onRoundStart += OnRoundStart;
+
             // For example purposes, assume fruitName is obtained from the instantiated fruit object
             fruitName = "Apple"; // Replace this with the actual fruit name from your game
 
@@ -68,8 +69,6 @@ namespace IQuiz
         void Update()
         {
             UpdateTime();
-
-            
         }
 
         #endregion
@@ -104,6 +103,10 @@ namespace IQuiz
                 Debug.Log("Congratulations! You've spelled the fruit name.");
                 // Perform actions for correct spelling
                 playerScore++;
+
+                //trial of sandclock
+                StartCoroutine(EndQuestion());
+
             }
 
         }
@@ -167,11 +170,12 @@ namespace IQuiz
             CreateButtons(shuffledName);
         }
         #endregion
-        
+
         #region IENUMERATOR
 
         IEnumerator EndQuestion()
         {
+            isRoundEnd = false;
             Debug.Log("Round End");
             yield return new WaitForSeconds(.1f);
             playerScoreText.text = $"Score: {playerScore}";
@@ -180,6 +184,8 @@ namespace IQuiz
             nameText.text = "";
             gameTimer = 15f;
             
+            sandClock.ResetTime();
+
 
         }
         #endregion
@@ -198,19 +204,13 @@ namespace IQuiz
                 {
                     timerSounds.Stop();
                 }
+                isRoundEnd = true;
+            }
+            if(gameTimer <= 0 && isRoundEnd)
+            {
+                StartCoroutine(EndQuestion());
             }
 
-        }
-
-        void OnRoundEnd(int round)
-        {
-            StartCoroutine(EndQuestion());
-        }
-
-        void OnRoundStart(int round)
-        {
-            SpawnQuestion();
-            gameTimer = 15f;
         }
         #endregion
 

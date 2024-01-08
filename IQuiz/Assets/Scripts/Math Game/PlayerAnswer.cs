@@ -26,11 +26,6 @@ namespace IQuiz
 
         }
 
-        public void ButtonIsPressed()
-        {
-            Debug.Log("this button is pressed");
-        }
-
         public void CheckAnswer()
         {
             if (this.buttonNumber == mathGameManager.answer)

@@ -18,7 +18,7 @@ namespace IQuiz
         //NOTE: INSTANTIATE MEANS SPAWNING GAME OBJECTS INTO GAME AREA
         //NOTE: THE HEADER AND SPACE ATTRIBUTES INSIDE BRACKETS ARE JUST TO ORGANIZE THE VARIABLE IN THE INSPECTOR PANEL
         [Header("Reference to other scripts")]
-        public SandClock sandClock;
+        public TimerSand sandClock;
         [Space]
 
         [Header("Arrays")]
@@ -57,8 +57,6 @@ namespace IQuiz
         // Start is called before the first frame update
         void Start()
         {
-            sandClock.onRoundEnd += OnRoundEnd;
-
             //CALLING THESE 2 FUNCTIONS WHEN THE GAME STARTS
             InstantiateNewPrefabs();
             PlaySound(); // Play sound when the game starts
@@ -84,10 +82,6 @@ namespace IQuiz
                     timerSounds.Stop();
                 }
             }
-        }
-        void OnRoundEnd(int round)
-        {
-            StartCoroutine(AnswerIndcatorAnimation());
         }
 
         //THIS FUNCTION GETS THE ANIMAL SOUNDS OF THE INSTANTIATED BUTTON
@@ -134,10 +128,17 @@ namespace IQuiz
                 answerInt = 1;
                 gameTimer = 10f;
             }
+            StartCoroutine(AnswerIndcatorAnimation());
+
         }
 
         IEnumerator AnswerIndcatorAnimation()
         {
+            if (timerSounds.isPlaying)
+            {
+                timerSounds.Stop();
+            }
+            timer = 10f;
             answerSounds[answerInt].Play();
             yield return new WaitForSeconds(0.5f);
 
@@ -152,19 +153,19 @@ namespace IQuiz
             instantiatedIndicators.Remove(instantiatedAnswerIndicator); // Remove from list before destroying
             Destroy(instantiatedAnswerIndicator);
             InstantiateNewPrefabs();
-            timer = sandClock.durationTime;
-            if(isCorrect)
+            if (isCorrect)
             {
                 playerScore++;
                 isCorrect = false;
             }
             answerInt = 1;
-
             // Set the timescale back to 1 after all the operations
             Time.timeScale = 1f;
+            sandClock.ResetTime();
+            timer = 10f;
             Debug.Log("EndRound");
 
-            
+
         }
 
 

@@ -32,7 +32,7 @@ namespace IQuiz
 
         [Header("Script Reference")]
         public PlayerAnswer[] playerAnswer; // An array of PlayerAnswer script references
-        public SandClock sandClock;
+        public TimerSand sandClock;
         public Player playerStats;
         [Space]
 
@@ -63,7 +63,6 @@ namespace IQuiz
             // Initialization when the game starts.
             Addition(); // Generate numbers for the question
             InitializeAnswer(); // Set up the answer choices
-            sandClock.onRoundEnd += OnRoundEnd;
 
             instantiatedAnswerIndicator = 1;
 
@@ -77,9 +76,19 @@ namespace IQuiz
             UpdateTime(); // Update timer display and functionality
         }
 
+        public void Answered()
+        {
+            StartCoroutine(NextQuestion());
+        }
+
         // Coroutine for handling next question logic.
         IEnumerator NextQuestion()
         {
+            if(timerSound.isPlaying)
+            {
+                timerSound.Stop();
+                timer = timerLimit;
+            }
             // Pauses the time for 3 seconds when the round ends.
             Time.timeScale = 0f;
             GameObject instantiatedPrefab = Instantiate(answerIndicatorPrefab[instantiatedAnswerIndicator], canvasTransform);
@@ -93,13 +102,6 @@ namespace IQuiz
                 playerScoreText.text = $"SCORE: {playerStats.playerScore.ToString()}";
             }
             timer = 10f;
-
-            // Reset 'hasAnswered' status for all players and update question and level counters.
-            // foreach (var item in playerAnswer)
-            // {
-            //     item.hasAnswered = false;
-                
-            // }
 
             foreach (var button in answerButton)
             {
@@ -120,6 +122,7 @@ namespace IQuiz
             questionText.text = $"QUESTION {currentQuestion.ToString()}";
             LevelManager();
             Time.timeScale = 1f;
+            sandClock.ResetTime();
         }
 
         #endregion
@@ -146,13 +149,13 @@ namespace IQuiz
                     StartMixed(); // Mixed questions with adjusted timer and level settings
                     timerLimit = 8f;
                     timer = timerLimit;
-                    sandClock.durationTime = timerLimit;
+                    sandClock.roundDuration = timerLimit;
                     break;
                 case 5:
                     StartMixed(); // More challenging mixed questions with further adjusted settings
                     timerLimit = 6f;
                     timer = timerLimit;
-                    sandClock.durationTime = timerLimit;
+                    sandClock.roundDuration = timerLimit;
                     break;
                 default:
                     Debug.Log("YOU HAVE REACHED THE MAXIMUM LEVEL "); // Alert when the max level is reached
@@ -176,12 +179,6 @@ namespace IQuiz
             {
                 timerSound.Stop();
             }
-        }
-
-        // Handler for the round end event.
-        void OnRoundEnd(int round)
-        {
-            StartCoroutine(NextQuestion()); // Proceed to the next question after the round ends
         }
 
         // Set 'hasAnswered' status for all players to true.
