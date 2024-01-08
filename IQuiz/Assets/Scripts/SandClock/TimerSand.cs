@@ -26,6 +26,7 @@ namespace IQuiz
         void Update()
         {
             UpdateFillAmount();
+            CalculateFillRate();
         }
 
         public void Begin()

@@ -18,6 +18,8 @@ namespace IQuiz
         public Transform buttonsParent; // Parent transform for buttons
         public TMP_Text nameText;
         public TMP_Text playerScoreText;
+        public TMP_Text levelText;
+        public Button undoButton;
         [Space]
 
         [Header("Other Script Reference")]
@@ -30,6 +32,7 @@ namespace IQuiz
 
         [Header("Time")]
         public float gameTimer;
+         float gametimerLimit = 15;
 
         [Header("Player Stats")]
         public int playerScore;
@@ -45,8 +48,16 @@ namespace IQuiz
         char clickedLetter;
 
         bool isRoundEnd;
-
+        [SerializeField]
+        int prevRandomIndex = 0;
         string userInput = ""; // User's input for spelling the fruit name
+
+        [Space]
+        [Header("Levels")]
+        public int currentLevel;
+        public int currentQuestion;
+        public int maxLevel;
+        public int maxQuestion;
 
         #region MonoBehaviour Callbacks
 
@@ -69,6 +80,7 @@ namespace IQuiz
         void Update()
         {
             UpdateTime();
+            levelText.text = $"LEVEL: {currentLevel}";
         }
 
         #endregion
@@ -161,10 +173,58 @@ namespace IQuiz
                 buttonList.Clear();
                 userInput = "";
             }
-            // Randomly select a fruit prefab and spawn it
-            int randomIndex = UnityEngine.Random.Range(0, fruitsPrefab.Length);
-            SpawnFruits(randomIndex);
 
+            int instantiatedLimit = 0;
+            int instantiatedLimitStart = 0;
+            switch (currentLevel)
+            {
+                case 1:
+                    instantiatedLimit = 5;
+                    instantiatedLimitStart = 0;
+                    Debug.Log($"Level: {currentLevel}");
+                    break;
+                case 2:
+                    instantiatedLimit = 5;
+                    instantiatedLimitStart = 0;
+                    Debug.Log($"Level: {currentLevel}");
+                    gametimerLimit = 10;
+                    sandClock.roundDuration = 10;
+                    break;
+                case 3:
+                    instantiatedLimit = 10;
+                    instantiatedLimitStart = 0;
+                    Debug.Log($"Level: {currentLevel}");
+                    break;
+                case 4:
+                    instantiatedLimit = fruitsPrefab.Length;
+                    instantiatedLimitStart = 12;
+                    Debug.Log($"Level: {currentLevel}");
+                    gametimerLimit = 8;
+                    sandClock.roundDuration = 8;
+                    break;
+                case 5:
+                    instantiatedLimit = fruitsPrefab.Length;
+                    instantiatedLimitStart = 12;
+                    undoButton.interactable = false;
+                    Debug.Log($"Level: {currentLevel}");
+                    break;
+                default:
+                    Debug.Log("Finished");
+                    break;
+            }
+            // Randomly select a fruit prefab and spawn it
+            int randomIndex = UnityEngine.Random.Range(instantiatedLimitStart, instantiatedLimit);
+            
+            
+            while(randomIndex == prevRandomIndex)
+            {
+                randomIndex = UnityEngine.Random.Range(instantiatedLimitStart, instantiatedLimit);
+                
+            }
+            SpawnFruits(randomIndex);
+            Debug.Log($"Random Index: {randomIndex}");
+            Debug.Log($"Prev Random Index: {prevRandomIndex}");
+            prevRandomIndex = randomIndex;
             // Shuffle the fruit name to create a jumbled version for buttons
             string shuffledName = shuffler.ShuffleString(fruitName);
             CreateButtons(shuffledName);
@@ -175,6 +235,11 @@ namespace IQuiz
 
         IEnumerator EndQuestion()
         {
+            if (timerSounds.isPlaying)
+            {
+                timerSounds.Stop();
+                gameTimer = gametimerLimit;
+            }
             isRoundEnd = false;
             Debug.Log("Round End");
             yield return new WaitForSeconds(.1f);
@@ -182,9 +247,22 @@ namespace IQuiz
             SpawnQuestion();
             userInput = "";
             nameText.text = "";
-            gameTimer = 15f;
-            
+            gameTimer = gametimerLimit;
+            sandClock.roundDuration = gametimerLimit;
+
             sandClock.ResetTime();
+            if (currentLevel <= maxLevel)
+            {
+                if (currentQuestion < maxQuestion)
+                {
+                    currentQuestion++;
+                }
+                else
+                {
+                    currentQuestion = 1;
+                    currentLevel++;
+                }
+            }
 
 
         }
@@ -206,7 +284,7 @@ namespace IQuiz
                 }
                 isRoundEnd = true;
             }
-            if(gameTimer <= 0 && isRoundEnd)
+            if (gameTimer <= 0 && isRoundEnd)
             {
                 StartCoroutine(EndQuestion());
             }
