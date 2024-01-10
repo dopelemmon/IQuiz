@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -21,15 +22,24 @@ namespace IQuiz
         [SerializeField] private TMP_Text questionText;
         [SerializeField] private TMP_Text scoreText;
         [SerializeField] private TMP_Text levelText;
+
+        [SerializeField] private TMP_Text countDownText;
         [Space]
 
         private GameObject instantiatedBodyPart;
+        [SerializeField] GameObject wrongGO;
+        [SerializeField] GameObject correctGO;
         [SerializeField] private List<GameObject> instantiatedGO = new List<GameObject>();
         private List<int> prevRandomIndex = new List<int>();
         private string bodyPartName;
         private string question;
         private string answer;
         private string buttonName;
+        [SerializeField] private bool isAnswered;
+
+        bool hasStarted;
+
+        private Coroutine questionCoroutine;
 
         #endregion
 
@@ -40,11 +50,16 @@ namespace IQuiz
         public AudioSource timerSounds;
 
         [Header("Time")]
-        public float gameTime;
-        public float timeLimit;
+        public float memorizingGameTimer;
+        public float memorizingTimeLimit;
+        public float answeringTimer;
+        public float countDownTimer;
+
+        [Space]
         public GameObject sandClockPrefab;
         GameObject sandClockGO;
         public Transform sandClockParent;
+        public MemoryUIManager memoryUIManager;
 
         [Space]
         [Header("Levels and Player")]
@@ -63,7 +78,7 @@ namespace IQuiz
         void Start()
         {
             StartCoroutine(Question());
-            timeLimit = 8f;
+
         }
 
         // Update is called once per frame
@@ -72,10 +87,42 @@ namespace IQuiz
             SetTextUI(question, questionText);
             SetTextUI($"Score: {playerScore}", scoreText);
             SetTextUI($"Level: {currentLevel}", levelText);
+
+            UpdateTimer();
+
+            switch (currentLevel)
+            {
+                case 1:
+                    memorizingTimeLimit = 8;
+                    break;
+                case 2:
+                    memorizingTimeLimit = 6;
+                    break;
+                case 3:
+                    memorizingTimeLimit = 4;
+                    break;
+                case 4:
+                    answeringTimer = 6;
+                    memorizingTimeLimit = 4;
+                    break;
+                case 5:
+                    answeringTimer = 4;
+                    memorizingTimeLimit = 4;
+                    break;
+                default:
+                    break;
+            }
+
+            if(memoryUIManager.IsSettingsOpen() && correctGO != null || memoryUIManager.IsSettingsOpen() && wrongGO != null)
+            {
+                Destroy(correctGO);
+                Destroy(wrongGO);
+            }
         }
 
         IEnumerator Question()
         {
+            ClearTexts();
             if (currentLevel < levelLimit)
             {
                 if (currentQuestion < questionLimit)
@@ -107,39 +154,62 @@ namespace IQuiz
             answer = bodyPartName;
 
             question = $"Where is the {bodyPartName} ?";
-
+            isAnswered = false;
             Debug.Log("question set");
             SpawnSandClock();
+
             if (!timerSounds.isPlaying)
             {
                 timerSounds.Play();
             }
-            yield return new WaitForSeconds(timeLimit);
+
+            yield return new WaitForSeconds(memorizingTimeLimit);
+            //MEMORIZING TIME LIMIT IS OVER
+            //TIME FOR PLAYER TO ANSWER
             if (timerSounds.isPlaying)
             {
                 timerSounds.Stop();
             }
+
             Destroy(sandClockGO);
             prevRandomIndex.Clear();
             SwitchImage();
+
+            //IF LEVEL 4 AND UP THEN PUT ANSWERING TIMER
+            if (currentLevel >= 4)
+            {
+                sandClockGO = Instantiate(sandClockPrefab, sandClockParent);
+                sandClockGO.GetComponent<TimerSand>().roundDuration = answeringTimer;
+                yield return new WaitForSeconds(answeringTimer);
+                if (!isAnswered)
+                {
+                    Destroy(sandClockGO);
+                    StartCoroutine(AnswerChecker());
+                    yield break;
+                }
+                Destroy(sandClockGO);
+                yield break;
+
+            }
         }
 
         IEnumerator AnswerChecker()
         {
             if (Checker())
             {
-                GameObject correctGO = Instantiate(correctPrefab, canvasTransform);
+                correctGO = Instantiate(correctPrefab, canvasTransform);
                 yield return new WaitForSeconds(3f);
                 Destroy(correctGO);
                 playerScore++;
-                StartCoroutine(Question());
+                questionCoroutine = StartCoroutine(Question());
             }
             else
             {
-                GameObject wrongGO = Instantiate(wrongPrefab, canvasTransform);
+                wrongGO = Instantiate(wrongPrefab, canvasTransform);
                 yield return new WaitForSeconds(3f);
                 Destroy(wrongGO);
-                StartCoroutine(Question());
+                DestroyImage();
+                questionCoroutine = StartCoroutine(Question());
             }
         }
         #endregion
@@ -207,6 +277,26 @@ namespace IQuiz
             }
         }
 
+        public void TryAgainButton()
+        {
+            currentLevel = 1;
+            currentQuestion = 0;
+            playerScore = 0;
+            StopAllCoroutines();
+            prevRandomIndex.Clear();
+            DestroyImage();
+            if (sandClockGO != null)
+            {
+                Destroy(sandClockGO);
+            }
+            if(timerSounds.isPlaying)
+            {
+                timerSounds.Stop();
+            }
+            ClearTexts();
+            // Restart the coroutine by calling it again
+            questionCoroutine = StartCoroutine(Question());
+        }
 
         #endregion
 
@@ -218,25 +308,33 @@ namespace IQuiz
 
             if (Checker())
             {
-                Debug.Log("Correct");
+                isAnswered = true; ;
                 DestroyImage();
                 StartCoroutine(AnswerChecker());
                 ClearTexts();
+                if (sandClockGO != null)
+                {
+                    Destroy(sandClockGO);
+
+                }
             }
             else
             {
-                Debug.Log("Wrong");
+                isAnswered = true;
                 DestroyImage();
                 StartCoroutine(AnswerChecker());
                 ClearTexts();
+                if (sandClockGO != null)
+                {
+                    Destroy(sandClockGO);
+                }
             }
         }
-
         public bool Checker()
         {
             if (buttonName == answer)
             {
-                
+
                 return true;
             }
             else
@@ -250,15 +348,14 @@ namespace IQuiz
         void SpawnSandClock()
         {
             sandClockGO = Instantiate(sandClockPrefab, sandClockParent);
-            sandClockGO.GetComponent<TimerSand>().roundDuration = timeLimit;
+            sandClockGO.GetComponent<TimerSand>().roundDuration = memorizingTimeLimit;
             Debug.Log("duration time is set");
         }
-
         void UpdateTimer()
         {
-            if (gameTime >= 0)
+            if (memorizingGameTimer >= 0)
             {
-                gameTime -= Time.deltaTime;
+                memorizingGameTimer -= Time.deltaTime;
             }
             else
             {
@@ -268,7 +365,7 @@ namespace IQuiz
 
         void ResetTimer()
         {
-            gameTime = timeLimit;
+            memorizingGameTimer = memorizingTimeLimit;
         }
         #endregion
     }
