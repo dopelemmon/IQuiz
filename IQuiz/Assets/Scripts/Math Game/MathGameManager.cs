@@ -39,6 +39,8 @@ namespace IQuiz
         [Header("Time")]
         public float timer;
         public float timerLimit;
+
+        public bool isAnswered;
         [Space]
 
         [Header("Question Variable")]
@@ -78,31 +80,36 @@ namespace IQuiz
 
         public void Answered()
         {
+            StartCoroutine(InstantiateAnswer());
+
+        }
+
+        IEnumerator InstantiateAnswer()
+        {
+            GameObject instantiatedPrefab = Instantiate(answerIndicatorPrefab[instantiatedAnswerIndicator], canvasTransform);
+            yield return new WaitForSecondsRealtime(2f);
+            Destroy(instantiatedPrefab);
+            isAnswered = false;
             StartCoroutine(NextQuestion());
         }
 
         // Coroutine for handling next question logic.
         IEnumerator NextQuestion()
         {
-            if(timerSound.isPlaying)
+            sandClock.ResetTime();
+            Debug.Log("next question initiated");
+            timer = timerLimit;
+            Debug.Log("timerlimit reset");
+            if (timerSound.isPlaying)
             {
                 timerSound.Stop();
-                timer = timerLimit;
             }
-            // Pauses the time for 3 seconds when the round ends.
-            Time.timeScale = 0f;
-            GameObject instantiatedPrefab = Instantiate(answerIndicatorPrefab[instantiatedAnswerIndicator], canvasTransform);
-            yield return new WaitForSecondsRealtime(3f);
-            Destroy(instantiatedPrefab);
-
             // Check for the correct answer and update player score and timer.
             if (instantiatedAnswerIndicator == 0)
             {
                 playerStats.UpdatePlayerScore();
                 playerScoreText.text = $"SCORE: {playerStats.playerScore.ToString()}";
             }
-            timer = 10f;
-
             foreach (var button in answerButton)
             {
                 button.image.sprite = buttonSelectedSprite;
@@ -121,8 +128,7 @@ namespace IQuiz
             levelText.text = $"LEVEL {currentLevel.ToString()}";
             questionText.text = $"QUESTION {currentQuestion.ToString()}";
             LevelManager();
-            Time.timeScale = 1f;
-            sandClock.ResetTime();
+            yield break;
         }
 
         #endregion
@@ -138,12 +144,15 @@ namespace IQuiz
                 // Different cases represent different levels and their corresponding operations.
                 case 1:
                     StartAddition(); // Start addition-based questions
+                    timerLimit = 10f;
                     break;
                 case 2:
                     StartSubtraction(); // Start subtraction-based questions
+                    timerLimit = 10f;
                     break;
                 case 3:
                     StartMixed(); // Start mixed addition and subtraction questions
+                    timerLimit = 10f;
                     break;
                 case 4:
                     StartMixed(); // Mixed questions with adjusted timer and level settings
@@ -166,29 +175,31 @@ namespace IQuiz
         // Method to update timer functionality.
         public void UpdateTime()
         {
-            timer -= Time.deltaTime;
 
-            // Play timer sound when the timer reaches a certain point.
-            if (timer <= 5f && !timerSound.isPlaying)
+            if (timer >= 0)
             {
-                timerSound.Play();
+                timer -= Time.deltaTime;
+                // Play timer sound when the timer reaches a certain point.
+                if (timer <= 5f && !timerSound.isPlaying)
+                {
+                    timerSound.Play();
+                }
+
+                // Stop timer sound when the timer is almost finished.
+                if (timer <= 2f && timerSound.isPlaying)
+                {
+                    timerSound.Stop();
+                }
+            }
+            if(timer <= 0 && !isAnswered)
+            {
+                timer = timerLimit;
+                StartCoroutine(InstantiateAnswer());
+
             }
 
-            // Stop timer sound when the timer is almost finished.
-            if (timer <= 2f && timerSound.isPlaying)
-            {
-                timerSound.Stop();
-            }
+
         }
-
-        // Set 'hasAnswered' status for all players to true.
-        // public void SetHasAnswered()
-        // {
-        //     foreach (var item in playerAnswer)
-        //     {
-        //         item.hasAnswered = true;
-        //     }
-        // }
 
         // Method to initialize answer choices for questions.
         public void InitializeAnswer()

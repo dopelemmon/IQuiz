@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,6 +13,8 @@ namespace IQuiz
         [Header("Component reference")]
         public AudioSource timerSounds;
         public AudioSource[] answerSounds; // the audiosource sounds variable 
+        public TMP_Text levelText;
+        public Button soundButton;
         [Space]
 
         //NOTE: THE PREFABS ARE THE BUTTONS AND THE SOUNDS 
@@ -48,6 +51,16 @@ namespace IQuiz
         [Header("Timer")]
         public float gameTimer = 5f;
         public float timer = 10f;
+        public float timerLimit;
+
+        [Header("Levels")]
+        public int currentLevel;
+        public int maxLevel;
+        public int currentQuestion;
+        public int maxQuestion;
+
+        public bool isAnswered;
+
 
         void Awake()
         {
@@ -60,28 +73,75 @@ namespace IQuiz
             //CALLING THESE 2 FUNCTIONS WHEN THE GAME STARTS
             InstantiateNewPrefabs();
             PlaySound(); // Play sound when the game starts
+            currentLevel = 1;
+            currentQuestion = 1;
+
+
         }
 
         // Update is called once per frame
         void Update()
         {
-            timer -= Time.deltaTime;
-            if (timer <= 5.0f)
+            if (timer >= 0)
             {
-                if (!timerSounds.isPlaying)
+                timer -= Time.deltaTime;
+                if (timer <= 5.0f)
                 {
-                    Debug.Log("Playing sound");
-                    timerSounds.Play();
+                    if (!timerSounds.isPlaying)
+                    {
+                        Debug.Log("Playing sound");
+                        timerSounds.Play();
+                    }
                 }
-            }
-
-            if (timer < 0.2f)
-            {
-                if (timerSounds.isPlaying)
+                if(timer > 5f && timerSounds.isPlaying)
                 {
                     timerSounds.Stop();
                 }
+
+                if (timer < 0.2f)
+                {
+                    if (timerSounds.isPlaying)
+                    {
+                        timerSounds.Stop();
+                    }
+                }
             }
+
+            if(timer <= 0 && !isAnswered)
+            {
+                StartCoroutine(AnswerIndcatorAnimation());
+                isAnswered = true;
+            }
+
+            switch (currentLevel)
+            {
+                case 1:
+                    timerLimit = 10;
+                    sandClock.roundDuration = timerLimit;
+                    break;
+                case 2:
+                    timerLimit = 8;
+                    sandClock.roundDuration = timerLimit;
+                    break;
+                case 3:
+                    timerLimit = 6;
+                    sandClock.roundDuration = timerLimit;
+                    break;
+                case 4:
+                    timerLimit = 6;
+                    sandClock.roundDuration = timerLimit;
+                    soundButton.interactable = false;
+                    break;
+                case 5:
+                    timerLimit = 4;
+                    sandClock.roundDuration = timerLimit;
+                    soundButton.interactable = false;
+                    break;
+                default:
+                    break;
+            }
+
+            levelText.text = $"LEVEL: {currentLevel.ToString()}";
         }
 
         //THIS FUNCTION GETS THE ANIMAL SOUNDS OF THE INSTANTIATED BUTTON
@@ -129,16 +189,30 @@ namespace IQuiz
                 gameTimer = 10f;
             }
             StartCoroutine(AnswerIndcatorAnimation());
+            isAnswered = true;
 
         }
 
         IEnumerator AnswerIndcatorAnimation()
         {
+            
+            if (currentLevel < maxLevel)
+            {
+                if (currentQuestion < maxQuestion)
+                {
+                    currentQuestion++;
+                }
+                else
+                {
+                    currentLevel++;
+                    currentQuestion = 1;
+                }
+            }
             if (timerSounds.isPlaying)
             {
                 timerSounds.Stop();
             }
-            timer = 10f;
+            
             answerSounds[answerInt].Play();
             yield return new WaitForSeconds(0.5f);
 
@@ -162,10 +236,9 @@ namespace IQuiz
             // Set the timescale back to 1 after all the operations
             Time.timeScale = 1f;
             sandClock.ResetTime();
-            timer = 10f;
+            timer = timerLimit;
+            isAnswered = false;
             Debug.Log("EndRound");
-
-
         }
 
 

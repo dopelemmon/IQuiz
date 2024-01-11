@@ -46,6 +46,8 @@ namespace IQuiz
                 }
 
             }
+            mathGameManager.isAnswered = true;
+            mathGameManager.Answered();
         }
     }
 }
