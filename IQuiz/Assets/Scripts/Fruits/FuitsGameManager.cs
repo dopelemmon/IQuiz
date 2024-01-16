@@ -20,6 +20,8 @@ namespace IQuiz
         public TMP_Text playerScoreText;
         public TMP_Text levelText;
         public Button undoButton;
+        public GameObject levelFinishedPanel;
+        public TMP_Text levelFinishedText;
         [Space]
 
         [Header("Other Script Reference")]
@@ -58,6 +60,7 @@ namespace IQuiz
         public int currentQuestion;
         public int maxLevel;
         public int maxQuestion;
+        public bool gameIsDone;
 
         #region MonoBehaviour Callbacks
 
@@ -209,7 +212,7 @@ namespace IQuiz
                     Debug.Log($"Level: {currentLevel}");
                     break;
                 default:
-                    Debug.Log("Finished");
+                    LevelFinished();
                     break;
             }
             // Randomly select a fruit prefab and spawn it
@@ -290,6 +293,29 @@ namespace IQuiz
             }
 
         }
+        #endregion
+
+        #region LEVEL METHODS
+        void LevelFinished()
+        {
+            levelFinishedPanel.SetActive(true);
+            Time.timeScale = 0f;
+            levelFinishedText.text = $"CONGRATULATIONS! YOU GOT A {playerScore} SCORE!";
+            gameIsDone = true;
+        }
+
+        public void TryAgain()
+        {
+            levelFinishedPanel.SetActive(false);
+            Time.timeScale = 1f;
+            currentLevel = 1;
+            currentQuestion = 1;
+            playerScore = 0;
+            gameIsDone = false;
+            sandClock.ResetTime();
+            gameTimer = gametimerLimit;
+        }
+            
         #endregion
 
 

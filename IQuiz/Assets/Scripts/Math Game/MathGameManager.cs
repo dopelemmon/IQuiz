@@ -24,6 +24,8 @@ namespace IQuiz
         public TMP_Text questionText;
         public TMP_Text playerScoreText;
         public Sprite buttonSelectedSprite;
+        public TMP_Text congratsText;
+        public GameObject gameFinishedPanel;
         [Space]
 
         [Header("Sound")]
@@ -39,6 +41,8 @@ namespace IQuiz
         [Header("Time")]
         public float timer;
         public float timerLimit;
+
+        bool gameIsDone;
 
         public bool isAnswered;
         [Space]
@@ -167,16 +171,38 @@ namespace IQuiz
                     sandClock.roundDuration = timerLimit;
                     break;
                 default:
-                    Debug.Log("YOU HAVE REACHED THE MAXIMUM LEVEL "); // Alert when the max level is reached
+                    LevelFinished();
+
                     break;
             }
+        }
+
+        void LevelFinished()
+        {
+            gameFinishedPanel.SetActive(true);
+            Time.timeScale = 0f;
+            congratsText.text = $"CONGRATULATIONS! YOU GOT A SCORE OF {playerStats.playerScore}";
+            gameIsDone = true;
+        }
+
+        public void TryAgain()
+        {
+            
+            Time.timeScale = 1f;
+            gameIsDone = false;
+            currentLevel = 1;
+            currentQuestion = 1;
+            gameFinishedPanel.SetActive(false);
+            levelText.text = $"LEVEL {currentLevel}";
+            Addition();
+            InitializeAnswer();
         }
 
         // Method to update timer functionality.
         public void UpdateTime()
         {
 
-            if (timer >= 0)
+            if (timer >= 0 && !gameIsDone)
             {
                 timer -= Time.deltaTime;
                 // Play timer sound when the timer reaches a certain point.

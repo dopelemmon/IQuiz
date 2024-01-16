@@ -15,6 +15,8 @@ namespace IQuiz
         public AudioSource[] answerSounds; // the audiosource sounds variable 
         public TMP_Text levelText;
         public Button soundButton;
+        [SerializeField] private GameObject gameFinishedPanel;
+        [SerializeField] private TMP_Text gameFinishedText;
         [Space]
 
         //NOTE: THE PREFABS ARE THE BUTTONS AND THE SOUNDS 
@@ -52,6 +54,7 @@ namespace IQuiz
         public float gameTimer = 5f;
         public float timer = 10f;
         public float timerLimit;
+        public bool gameIsDone;
 
         [Header("Levels")]
         public int currentLevel;
@@ -138,10 +141,28 @@ namespace IQuiz
                     soundButton.interactable = false;
                     break;
                 default:
+                    LevelFinished();
                     break;
             }
 
             levelText.text = $"LEVEL: {currentLevel.ToString()}";
+        }
+
+        void LevelFinished()
+        {
+            gameFinishedPanel.SetActive(true);
+            Time.timeScale = 0f;
+            gameFinishedText.text = $"CONGRATULATIONS! YOU GOT {playerScore} SCORE!";
+            gameIsDone = true;
+        }
+
+        public void TryAgain()
+        {
+            gameFinishedPanel.SetActive(false);
+            Time.timeScale = 1f; 
+            currentLevel = 1;
+            playerScore = 0; 
+            currentQuestion = 0;
         }
 
         //THIS FUNCTION GETS THE ANIMAL SOUNDS OF THE INSTANTIATED BUTTON
@@ -195,8 +216,7 @@ namespace IQuiz
 
         IEnumerator AnswerIndcatorAnimation()
         {
-            
-            if (currentLevel < maxLevel)
+            if (currentLevel <= maxLevel)
             {
                 if (currentQuestion < maxQuestion)
                 {
@@ -239,6 +259,7 @@ namespace IQuiz
             timer = timerLimit;
             isAnswered = false;
             Debug.Log("EndRound");
+            
         }
 
 

@@ -22,6 +22,8 @@ namespace IQuiz
         [SerializeField] private TMP_Text questionText;
         [SerializeField] private TMP_Text scoreText;
         [SerializeField] private TMP_Text levelText;
+        [SerializeField] private GameObject levelfinishedPanel;
+        [SerializeField] private TMP_Text levelFinishedText;
 
         [SerializeField] private TMP_Text countDownText;
         [Space]
@@ -68,6 +70,7 @@ namespace IQuiz
         public int playerScore;
         public int questionLimit;
         public int levelLimit;
+        bool gameIsDone;
 
         #endregion
 
@@ -110,10 +113,11 @@ namespace IQuiz
                     memorizingTimeLimit = 4;
                     break;
                 default:
+                    LevelFinished();
                     break;
             }
 
-            if(memoryUIManager.IsSettingsOpen() && correctGO != null || memoryUIManager.IsSettingsOpen() && wrongGO != null)
+            if (memoryUIManager.IsSettingsOpen() && correctGO != null || memoryUIManager.IsSettingsOpen() && wrongGO != null)
             {
                 Destroy(correctGO);
                 Destroy(wrongGO);
@@ -123,7 +127,7 @@ namespace IQuiz
         IEnumerator Question()
         {
             ClearTexts();
-            if (currentLevel < levelLimit)
+            if (currentLevel <= levelLimit)
             {
                 if (currentQuestion < questionLimit)
                 {
@@ -266,6 +270,25 @@ namespace IQuiz
             question = "";
             buttonName = "";
         }
+        void LevelFinished()
+        {
+            levelfinishedPanel.SetActive(true);
+            Time.timeScale = 0f;
+            levelFinishedText.text = $"CONGRATULATIONS! YOU GOT A {playerScore} SCORE!";
+            gameIsDone = true;
+            TryAgainButton();
+
+        }
+
+        public void TryAgain()
+        {
+            levelfinishedPanel.SetActive(false);
+            Time.timeScale = 1f;
+            currentLevel = 1;
+            currentQuestion = 1;
+            playerScore = 0;
+            gameIsDone = true;
+        }
 
         public void SwitchImage()
         {
@@ -289,7 +312,7 @@ namespace IQuiz
             {
                 Destroy(sandClockGO);
             }
-            if(timerSounds.isPlaying)
+            if (timerSounds.isPlaying)
             {
                 timerSounds.Stop();
             }
