@@ -16,13 +16,13 @@ PlayerSettings:
   productName: IQuiz
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
-  m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
+  m_SplashScreenBackgroundColor: {r: 0.8, g: 0.8, b: 0.8, a: 1}
   m_ShowUnitySplashScreen: 1
   m_ShowUnitySplashLogo: 1
   m_SplashScreenOverlayOpacity: 1
   m_SplashScreenAnimation: 1
-  m_SplashScreenLogoStyle: 1
-  m_SplashScreenDrawMode: 0
+  m_SplashScreenLogoStyle: 0
+  m_SplashScreenDrawMode: 1
   m_SplashScreenBackgroundAnimationZoom: 1
   m_SplashScreenLogoAnimationZoom: 1
   m_SplashScreenBackgroundLandscapeAspect: 1
@@ -39,8 +39,13 @@ PlayerSettings:
     y: 0
     width: 1
     height: 1
-  m_SplashScreenLogos: []
-  m_VirtualRealitySplashScreen: {fileID: 0}
+  m_SplashScreenLogos:
+  - logo: {fileID: 10404, guid: 0000000000000000f000000000000000, type: 0}
+    duration: 2
+  - logo: {fileID: 21300000, guid: d7bdf5fd553b0ab4fb37c94172607229, type: 3}
+    duration: 5
+  m_VirtualRealitySplashScreen: {fileID: 2800000, guid: d7bdf5fd553b0ab4fb37c94172607229,
+    type: 3}
   m_HolographicTrackingLossScreen: {fileID: 0}
   defaultScreenWidth: 1024
   defaultScreenHeight: 768
@@ -55,7 +60,7 @@ PlayerSettings:
   numberOfMipsStrippedPerMipmapLimitGroup: {}
   m_StackTraceTypes: 010000000100000001000000000000000100000001000000
   iosShowActivityIndicatorOnLoading: -1
-  androidShowActivityIndicatorOnLoading: -1
+  androidShowActivityIndicatorOnLoading: 2
   iosUseCustomAppBackgroundBehavior: 0
   allowedAutorotateToPortrait: 1
   allowedAutorotateToPortraitUpsideDown: 1
@@ -65,15 +70,15 @@ PlayerSettings:
   use32BitDisplayBuffer: 1
   preserveFramebufferAlpha: 0
   disableDepthAndStencilBuffers: 0
-  androidStartInFullscreen: 1
-  androidRenderOutsideSafeArea: 1
+  androidStartInFullscreen: 0
+  androidRenderOutsideSafeArea: 0
   androidUseSwappy: 1
-  androidBlitType: 2
+  androidBlitType: 0
   androidResizableWindow: 0
   androidDefaultWindowWidth: 1920
   androidDefaultWindowHeight: 1080
-  androidMinimumWindowWidth: 400
-  androidMinimumWindowHeight: 300
+  androidMinimumWindowWidth: 1920
+  androidMinimumWindowHeight: 1080
   androidFullscreenMode: 3
   defaultIsNativeResolution: 1
   macRetinaSupport: 1
@@ -151,7 +156,7 @@ PlayerSettings:
   hdrBitDepth: 0
   m_ColorGamuts: 00000000
   targetPixelDensity: 30
-  resolutionScalingMode: 0
+  resolutionScalingMode: 2
   resetResolutionOnWindowResize: 0
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1

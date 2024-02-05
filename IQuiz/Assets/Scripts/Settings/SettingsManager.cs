@@ -36,7 +36,7 @@ namespace IQuiz
             }
         }
 
-        public void MuteUnmute()
+        public void MuteUnmute() // manipulates sound by muting it
         {
             if (backgroundSound.mute)
             {

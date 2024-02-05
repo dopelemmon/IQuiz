@@ -50,6 +50,7 @@ namespace IQuiz
 
         void UpdateFillAmount()
         {
+            //check top fill ammount is greater than 0
             if (topFillImage.fillAmount > 0)
             {
                 topFillImage.fillAmount -= Time.deltaTime * fillRate;
@@ -68,7 +69,8 @@ namespace IQuiz
             StartCoroutine(ClockRotation());
         }
 
-        IEnumerator ClockRotation()
+
+        IEnumerator ClockRotation() // rotates the clock for vfx
         {
             
              transform

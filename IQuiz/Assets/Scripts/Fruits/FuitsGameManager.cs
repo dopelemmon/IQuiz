@@ -187,7 +187,7 @@ namespace IQuiz
                     Debug.Log($"Level: {currentLevel}");
                     break;
                 case 2:
-                    instantiatedLimit = 5;
+                    instantiatedLimit = 7;
                     instantiatedLimitStart = 0;
                     Debug.Log($"Level: {currentLevel}");
                     gametimerLimit = 10;

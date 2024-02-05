@@ -24,11 +24,11 @@ namespace IQuiz
         {
             if (IsSettingsOpen())
             {
-                Time.timeScale = 0;
+                Time.timeScale = 0; // real game time to zero pausing the game
             }
             else
             {
-                Time.timeScale = 1;
+                Time.timeScale = 1; // real game time to 1 default duration of game time and resuming the game
             }
         }
 
