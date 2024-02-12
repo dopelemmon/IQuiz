@@ -26,6 +26,8 @@ namespace IQuiz
         public Sprite buttonSelectedSprite;
         public TMP_Text congratsText;
         public GameObject gameFinishedPanel;
+        public GameObject tutorialText;
+        public GameObject sandClockGO;
         [Space]
 
         [Header("Sound")]
@@ -41,6 +43,7 @@ namespace IQuiz
         [Header("Time")]
         public float timer;
         public float timerLimit;
+        bool timerStart;
 
         bool gameIsDone;
 
@@ -66,9 +69,9 @@ namespace IQuiz
         #region Unity Methods
         void Start()
         {
+
             // Initialization when the game starts.
-            Addition(); // Generate numbers for the question
-            InitializeAnswer(); // Set up the answer choices
+            StartCoroutine(TutorialCoroutine());
 
             instantiatedAnswerIndicator = 1;
 
@@ -86,6 +89,21 @@ namespace IQuiz
         {
             StartCoroutine(InstantiateAnswer());
 
+        }
+
+        IEnumerator TutorialCoroutine()
+        {
+            Time.timeScale = 0f;
+            tutorialText.SetActive(true);
+            yield return new WaitForSecondsRealtime(3f);
+            tutorialText.GetComponent<TMP_Text>().text = "Choose the answer provided below";
+            yield return new WaitForSecondsRealtime(3f);
+            Time.timeScale = 1f;
+            tutorialText.SetActive(false);
+            timerStart = true;
+            sandClockGO.SetActive(true);
+            Addition(); // Generate numbers for the question
+            InitializeAnswer(); // Set up the answer choices
         }
 
         IEnumerator InstantiateAnswer()
@@ -202,7 +220,7 @@ namespace IQuiz
         public void UpdateTime()
         {
 
-            if (timer >= 0 && !gameIsDone)
+            if (timer >= 0 && !gameIsDone && timerStart)
             {
                 timer -= Time.deltaTime;
                 // Play timer sound when the timer reaches a certain point.
@@ -217,7 +235,7 @@ namespace IQuiz
                     timerSound.Stop();
                 }
             }
-            if(timer <= 0 && !isAnswered)
+            if(timer <= 0 && !isAnswered && timerStart)
             {
                 timer = timerLimit;
                 StartCoroutine(InstantiateAnswer());

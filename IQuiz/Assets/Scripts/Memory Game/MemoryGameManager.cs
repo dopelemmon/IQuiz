@@ -92,7 +92,7 @@ namespace IQuiz
             SetTextUI($"Level: {currentLevel}", levelText);
 
             UpdateTimer();
-
+            //SWITCH CASE THAT HANDLES THE BEHAVIOR OF GAME THROUGH CURRENT LEVEL VARIABLE
             switch (currentLevel)
             {
                 case 1:
@@ -219,7 +219,7 @@ namespace IQuiz
         #endregion
 
         #region Spawn and Destroy Image method
-        public void InstantiateButton()
+        public void InstantiateButton() //SPAWN PICTURES 
         {
             int randomIndex = Random.Range(0, bodyPartImage.Length);
 
@@ -298,6 +298,7 @@ namespace IQuiz
                 itemImage.sprite = backCardSprite;
                 item.GetComponent<Button>().interactable = true;
             }
+            Debug.Log("All image switched!");
         }
 
         public void TryAgainButton()

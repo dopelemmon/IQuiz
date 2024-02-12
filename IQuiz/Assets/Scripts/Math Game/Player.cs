@@ -23,6 +23,7 @@ namespace IQuiz
         public void UpdatePlayerScore()
         {
             playerScore++;
+            
         }
     }
 }

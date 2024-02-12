@@ -13,7 +13,7 @@ namespace IQuiz
         [Header("Component reference")]
         public AudioSource timerSounds;
         public AudioSource[] answerSounds; // the audiosource sounds variable 
-        public TMP_Text levelText;
+        public TMP_Text levelText; // LEVEL TEXT ELEMENT
         public Button soundButton;
         [SerializeField] private GameObject gameFinishedPanel;
         [SerializeField] private TMP_Text gameFinishedText;
@@ -85,6 +85,7 @@ namespace IQuiz
         // Update is called once per frame
         void Update()
         {
+            //TIMER CODE BELOW
             if (timer >= 0)
             {
                 timer -= Time.deltaTime;
@@ -116,9 +117,11 @@ namespace IQuiz
                 isAnswered = true;
             }
 
+            //LEVEL MANAGER
             switch (currentLevel)
             {
-                case 1:
+                
+                case 1://IF LEVEL 1 DO THIS: *SAME IN ALL LEVELS IN CASE VALUE*
                     timerLimit = 10;
                     sandClock.roundDuration = timerLimit;
                     break;
