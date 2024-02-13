@@ -24,6 +24,8 @@ namespace IQuiz
         [SerializeField] private TMP_Text levelText;
         [SerializeField] private GameObject levelfinishedPanel;
         [SerializeField] private TMP_Text levelFinishedText;
+        [SerializeField] private TMP_Text tutorialText;
+        [SerializeField] private GameObject tutorialTextBG;
 
         [SerializeField] private TMP_Text countDownText;
         [Space]
@@ -160,6 +162,15 @@ namespace IQuiz
             question = $"Where is the {bodyPartName} ?";
             isAnswered = false;
             Debug.Log("question set");
+
+            if (currentLevel <=1 && currentQuestion <= 1)
+            {
+                //tutorial text activating
+                tutorialTextBG.SetActive(true);
+                tutorialText.text = "Memorize the position of the body part within the given time";
+                yield return new WaitForSeconds(4f);
+                tutorialTextBG.SetActive(false);
+            }
             SpawnSandClock();
 
             if (!timerSounds.isPlaying)
@@ -169,6 +180,8 @@ namespace IQuiz
 
             yield return new WaitForSeconds(memorizingTimeLimit);
             //MEMORIZING TIME LIMIT IS OVER
+            //TURNING OFF THE TUTORIAL TEXT
+            
             //TIME FOR PLAYER TO ANSWER
             if (timerSounds.isPlaying)
             {
@@ -179,6 +192,15 @@ namespace IQuiz
             prevRandomIndex.Clear();
             SwitchImage();
 
+           if (currentLevel <=1 && currentQuestion <= 1)
+           {
+             //TUTORIAL REACTIVATING AND CHANGING THE TEXT VALUE
+             tutorialTextBG.SetActive(true);
+             tutorialText.text = "If you memorized the images select the correct answer";
+             yield return new WaitForSecondsRealtime(4f);
+             //DEACTIVATING TUTORIAL TEXT
+             tutorialTextBG.SetActive(false);
+           }
             //IF LEVEL 4 AND UP THEN PUT ANSWERING TIMER
             if (currentLevel >= 4)
             {

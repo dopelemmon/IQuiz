@@ -10,7 +10,7 @@ namespace IQuiz
         public Image topFillImage;
         public Image bottomFillImage;
 
-        public float roundDuration;
+        public float roundDuration; // DURATION OF THE SANDCLOCK
         private float fillRate;
 
         public bool isRunning = false;

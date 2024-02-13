@@ -79,7 +79,6 @@ namespace IQuiz
             currentLevel = 1;
             currentQuestion = 1;
 
-
         }
 
         // Update is called once per frame
